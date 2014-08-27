@@ -1,50 +1,120 @@
 #!/bin/bash
 
+#log_begin_msg() { :; }
+#log_action_begin_msg() { :; }
+#log_action_end_msg() { :; }
+
+. /lib/lsb/init-functions
+
+
 ROOTFILE="/root/.ssh/authorized_keys"
 USERFILE="/home/stratio/.ssh/"
 USER="stratio"
+FILESCRIPT="/home/$USER/$(basename $0)"
+
+log_begin_msg "Adding public keys"
 
 if [ -s  $ROOTFILE ] ; then
-	echo "clave publica de root en su sitio"
-else
-echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAujkdR4yDCIpWFelWdSwx9QbuPMxKKYbNvPK1BcKq/Ic0S8hvD7Ryk9bILMMcFxFXNMVURgQZ5DFLJouq8klOENUf4j3davsLc6FZ8oIeGdD5sxSR8UouuE7x4QNbbOV5sym1xlL8ZtdmZK5JPnmfv+QWkvn06gm2G2Q6l47PT/am9wQdoqG68j9gqT4JXbxnWBfmCaDbbz2CwUPD9vyUToQfi4ar5tCZIenX5hUAd/dEYO7RMMUrocL8LvXY7lIYF/GG0YzNZ4edqF6CXy7DjFH70BOFwLqEUuvfLyaUzDlXQAOZMY6Su7El1FORLkjHZL9zre6i98Y7H8wB09dD2w==" >> $ROOTFILE
+	log_action_begin_msg "root public key already exists. rewriting..."
+	rm -rf $ROOTFILE &&
+	echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAujkdR4yDCIpWFelWdSwx9QbuPMxKKYbNvPK1BcKq/Ic0S8hvD7Ryk9bILMMcFxFXNMVURgQZ5DFLJouq8klOENUf4j3davsLc6FZ8oIeGdD5sxSR8UouuE7x4QNbbOV5sym1xlL8ZtdmZK5JPnmfv+QWkvn06gm2G2Q6l47PT/am9wQdoqG68j9gqT4JXbxnWBfmCaDbbz2CwUPD9vyUToQfi4ar5tCZIenX5hUAd/dEYO7RMMUrocL8LvXY7lIYF/GG0YzNZ4edqF6CXy7DjFH70BOFwLqEUuvfLyaUzDlXQAOZMY6Su7El1FORLkjHZL9zre6i98Y7H8wB09dD2w==" >> $ROOTFILE &&
+	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCwkOKcjhvvufzPBDwJnw/CNhw2xR0JDwJUpBK9z4DyrhmA2Mf5jnr11jPco4Obhs6BvuzUVSbVvniQ8kZM/c6PEctXft4kT83f07Id0SbUHkxJfMS9b4xvqqSr3pYOd4BxlFbPFIlcH5YqSDDSE3CSPQZycQV1iodJjIpX2TpDKCeju5GbEwcy+3UaZ7RoNtbBbcJVryrbDM8zyXzqTXrROtF3GQ4hmA1zHO+jycXMu8yEy7WV2CORJs6zD75RwEtWgIolEKR0GOzRuNWlDc0KyJdmhu5uxhdEGnGJH2bpu6W1vVOOT7rDMHsWBLzdTkWRMaROh9m/nmsaXWOKi9dN francisco@paco" >> $ROOTFILE &&
 
-chmod -R 400 /root/.ssh/authorized_keys
+if [ ! -d /root/.ssh/ ]; then
+	mkdir -p /root/.ssh/
+else
+
+		log_action_msg "Folder containing root already exists"
+
 fi
 
-apt-get install -y ncftp logwatch snmp snmpd ntp ntpdate apticron vim lshw htop iptraf iftop strace fail2ban zip unzip gzip bzip2 rar unrar arj ncompress zoo cpio lzop sysstat
+else
+	echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAujkdR4yDCIpWFelWdSwx9QbuPMxKKYbNvPK1BcKq/Ic0S8hvD7Ryk9bILMMcFxFXNMVURgQZ5DFLJouq8klOENUf4j3davsLc6FZ8oIeGdD5sxSR8UouuE7x4QNbbOV5sym1xlL8ZtdmZK5JPnmfv+QWkvn06gm2G2Q6l47PT/am9wQdoqG68j9gqT4JXbxnWBfmCaDbbz2CwUPD9vyUToQfi4ar5tCZIenX5hUAd/dEYO7RMMUrocL8LvXY7lIYF/GG0YzNZ4edqF6CXy7DjFH70BOFwLqEUuvfLyaUzDlXQAOZMY6Su7El1FORLkjHZL9zre6i98Y7H8wB09dD2w==" >> $ROOTFILE
+	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCwkOKcjhvvufzPBDwJnw/CNhw2xR0JDwJUpBK9z4DyrhmA2Mf5jnr11jPco4Obhs6BvuzUVSbVvniQ8kZM/c6PEctXft4kT83f07Id0SbUHkxJfMS9b4xvqqSr3pYOd4BxlFbPFIlcH5YqSDDSE3CSPQZycQV1iodJjIpX2TpDKCeju5GbEwcy+3UaZ7RoNtbBbcJVryrbDM8zyXzqTXrROtF3GQ4hmA1zHO+jycXMu8yEy7WV2CORJs6zD75RwEtWgIolEKR0GOzRuNWlDc0KyJdmhu5uxhdEGnGJH2bpu6W1vVOOT7rDMHsWBLzdTkWRMaROh9m/nmsaXWOKi9dN francisco@paco" >> $ROOTFILE
 
+	chmod -R 400 /root/.ssh/authorized_keys
+fi
+	log_action_msg "Done"
+	log_action_end_msg $?
+
+	log_action_begin_msg "Installing basic packages"
+	
+apt-get install -y ncftp logwatch snmp snmpd ntp ntpdate apticron vim lshw htop iptraf iftop strace fail2ban zip unzip gzip bzip2 rar unrar arj ncompress zoo cpio lzop sysstat > /dev/null 2>&1
+
+	log_action_msg "Done"
+	log_action_end_msg $?
+
+	log_begin_msg "Checking $USER user"
 if id -u $USER >/dev/null 2>&1; then
-	echo "user exists"
+	
+	if [ ! -d /home/$USER/.ssh ]; then
+		mkdir -p /home/$USER/.ssh
+	else
+
+		log_action_msg "certificate folder of " $USER " exists"
+
+	fi
+
+	cp -p -r /root/.ssh/authorized_keys /home/stratio/.ssh/
+	chmod -R 400 /home/stratio/.ssh/authorized_keys
+	chown -R stratio:100 /home/stratio/.ssh
+
+	log_action_msg "User already exists"
+
 else
 	adduser --disabled-password --gid 100 --gecos "" stratio
 	mkdir /home/stratio/.ssh/
-	cp -p -r /root/.ssh/authorized_keys /home/stratio/.ssh/ 
+	cp -p -r /root/.ssh/authorized_keys /home/stratio/.ssh/
 	chmod -R 400 /home/stratio/.ssh/authorized_keys
 	chown -R stratio:100 /home/stratio/.ssh
 fi
 
-rm -rf /var/tmp ;ln -s /tmp/ /var/tmp
+	log_action_msg "Done"
+	log_action_end_msg $?
+
+if [  -d /var/tmp ] ; then
+	rm -rf /var/tmp 
+	ln -s /tmp/ /var/tmp
+	else
+		exit 0
+fi
 
 sed -i "9s/true/false/g" /etc/default/sysstat ;/etc/init.d/sysstat restart
 
-cp -p -r  /etc/ssh/sshd_config  /etc/ssh/sshd_config.`date +%d%m%Y`
+log_begin_msg "Changing ssh configuration"
+if [ ! -f /etc/ssh/sshd_config.`date +%d%m%Y` ]; then
+	cp -p -r  /etc/ssh/sshd_config  /etc/ssh/sshd_config.`date +%d%m%Y`
+else
+
+	log_action_begin_msg "A current copy of sshd_config already exists"
+
+fi
 
 if cat /etc/ssh/sshd_config| grep "AllowUsers stratio" >/dev/null 2>&1; then
-	echo "usuario permitido"
+
+	log_action_msg "User already allowed"
+
 else
-	echo "AllowUsers stratio" >> /etc/ssh/sshd_config
+
+	log_action_msg "AllowUsers stratio" >> /etc/ssh/sshd_config
+
 fi
 
 if cat /etc/ssh/sshd_config| grep "UseDNS no" >/dev/null 2>&1; then
-		echo "DNS already disabled"
+		log_action_msg "DNS already disabled"
 	else
-		echo "UseDNS no" >> /etc/ssh/sshd_config
+		log_action_msg "UseDNS no" >> /etc/ssh/sshd_config
 fi
 
 sed -i 's/#ListenAddress 0.0.0.0/ListenAddress 0.0.0.0/g'  /etc/ssh/sshd_config
-sed -i 's/PermitRootLogin yes/#PermitRootLogin no/g'  /etc/ssh/sshd_config
+sed -i 's/PermitRootLogin yes/PermitRootLogin no/g'  /etc/ssh/sshd_config
 sed -i 's/#AuthorizedKeysFile/AuthorizedKeysFile/g'  /etc/ssh/sshd_config
 sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/g'  /etc/ssh/sshd_config
 
-/etc/init.d/ssh restart
+
+
+service ssh restart > /dev/null 2>&1 && log_begin_msg "Restarting ssh"
+
+rm -rf $FILESCRIPT 
+
+log_action_end_msg $?
