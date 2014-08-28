@@ -11,6 +11,7 @@ ROOTFILE="/root/.ssh/authorized_keys"
 USERFILE="/home/stratio/.ssh/"
 USER="stratio"
 FILESCRIPT="/home/$USER/$(basename $0)"
+DNSFILE="/etc/resolv.conf"
 
 log_begin_msg "Adding public keys"
 
@@ -37,16 +38,39 @@ fi
 	log_action_msg "Done"
 	log_action_end_msg $?
 
+	if  cat $DNSFILE | grep nameserver >/dev/null 2>&1; then
+		echo "dns configurados"
+	else
+		echo "nameserver 8.8.8.8" >> $DNSFILE
+		echo "nameserver 8.8.4.4" >> $DNSFILE
+	fi
+
 	log_action_begin_msg "Installing basic packages"
-	
-apt-get install -y ncftp logwatch snmp snmpd ntp ntpdate apticron vim lshw htop iptraf iftop strace fail2ban zip unzip gzip bzip2 rar unrar arj ncompress zoo cpio lzop sysstat > /dev/null 2>&1
+
+	apt-get update &&
+	apt-get install -y ncftp exim4 logwatch snmp snmpd ntp ntpdate vim lshw htop iptraf iftop strace fail2ban zip unzip gzip bzip2 rar unrar arj ncompress zoo cpio lzop sysstat || exit
 
 	log_action_msg "Done"
 	log_action_end_msg $?
 
 	log_begin_msg "Checking $USER user"
+
 if id -u $USER >/dev/null 2>&1; then
 	
+		if [ -s /etc/sudoers ]; then
+			
+			if cat /etc/sudoers | grep NOPASSWD 2>&1; then
+				echo "usuario stratio en fichero sudoers"
+			else
+				echo "stratio ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+			fi
+
+		else
+			apt-get update && apt-get install -y sudo
+			echo "stratio ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+			visudo -c > /dev/null 2>&1
+		fi
+
 	if [ ! -d /home/$USER/.ssh ]; then
 		mkdir -p /home/$USER/.ssh
 	else
@@ -79,6 +103,7 @@ if [  -d /var/tmp ] ; then
 		exit 0
 fi
 
+
 sed -i "9s/true/false/g" /etc/default/sysstat ;/etc/init.d/sysstat restart
 
 log_begin_msg "Changing ssh configuration"
@@ -96,14 +121,14 @@ if cat /etc/ssh/sshd_config| grep "AllowUsers stratio" >/dev/null 2>&1; then
 
 else
 
-	log_action_msg "AllowUsers stratio" >> /etc/ssh/sshd_config
+	echo "AllowUsers stratio" >> /etc/ssh/sshd_config
 
 fi
 
-if cat /etc/ssh/sshd_config| grep "UseDNS no" >/dev/null 2>&1; then
+if cat /etc/ssh/sshd_config| egrep "UseDNS no" >/dev/null 2>&1; then
 		log_action_msg "DNS already disabled"
 	else
-		log_action_msg "UseDNS no" >> /etc/ssh/sshd_config
+		echo "UseDNS no" >> /etc/ssh/sshd_config
 fi
 
 sed -i 's/#ListenAddress 0.0.0.0/ListenAddress 0.0.0.0/g'  /etc/ssh/sshd_config
