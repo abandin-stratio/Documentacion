@@ -48,7 +48,7 @@ if [ "$TYPE" = "server" ]; then
 
 #Instalacion del servidor
 log_action_msg "Installing Zabbix Server"
-apt-get -y install zabbix-server-mysql zabbix-frontend-php >/dev/null 2>&1
+apt-get -y install zabbix-server-mysql zabbix-frontend-php
 log_action_end_msg $?
 
 else
@@ -56,7 +56,7 @@ else
 	if [ "$TYPE" = "agent" ]; then
 	#Instalacion del Agente
 	log_action_msg "Installing  Zabbix Agent"
-	apt-get install zabbix-agent >/dev/null 2>&1
+	 apt-get update  >/dev/null 2>&1 && apt-get install zabbix-agent
 	log_action_end_msg $?
 	else log_action_cont_msg "I think you misspelled the option"
 		exit 1
