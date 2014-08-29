@@ -1,7 +1,10 @@
 #!/bin/bash
 
+. /lib/lsb/init-functions
+
 ZABBIX_CONF_FILE="/etc/zabbix/zabbix_agentd.conf"
 ZABBIX_SERVER=$1
+ZABBIX_SERVER_IP="10.200.0.54"
 SOURCEIP=$(hostname --ip-address |awk {'print $1'})
 HOSTNAME=$(hostname --fqdn)
 FILESCRIPT="/home/$USER/$(basename $0)"
@@ -16,35 +19,38 @@ if [ $# -ne 1 ]; then
 	exit 1
 fi
 
+if  ! cat /etc/hosts | grep $ZABBIX_SERVER; then
+	echo $ZABBIX_SERVER_IP $ZABBIX_SERVER   >> /etc/hosts
+fi
 
 if [ -s $ZABBIX_CONF_FILE ]; then
 
 #SourceIP=148.251.151.3
-sed -i 's/^.\bSourceIP\b.*$/SourceIP='$SOURCEIP'/' $ZABBIX_CONF_FILE
+sed -i  's/^.[\s \s]SourceIP=.*$/SourceIP='$SOURCEIP'/' $ZABBIX_CONF_FILE
 
 #EnableRemoteCommands=1
-sed -i 's/^.\bEnableRemoteCommands\b.*$/EnableRemoteCommands=1/' $ZABBIX_CONF_FILE
+sed -i  's/^.[\s \s]EnableRemoteCommands=.*$/EnableRemoteCommands=1/' $ZABBIX_CONF_FILE
 
 #LogRemoteCommands=1
-sed -i 's/^.\bLogRemoteCommands\b.*$/LogRemoteCommands=1/' $ZABBIX_CONF_FILE
+sed -i  's/^.[\s \s]LogRemoteCommands=.*$/LogRemoteCommands=1/' $ZABBIX_CONF_FILE
 
 #Server=admin-preproduccion-benchmark.stratio.com
-sed -i 's/^\bServer\b.*$/Server='$ZABBIX_SERVER'/' $ZABBIX_CONF_FILE
+sed -i  's/^Server=[[:digit:]]*\.[[:digit:]]*\.[[:digit:]]*\.[[:digit:]]*/Server='$ZABBIX_SERVER'/' $ZABBIX_CONF_FILE
 
 #ListenPort=10050
-sed -i 's/^*\b#ListenPort\b.*$/ListenPort=10050/' $ZABBIX_CONF_FILE
+sed -i  's/^.[\s \s]ListenPort=.*$/ListenPort=10050/' $ZABBIX_CONF_FILE	
 
 #ListenIP=0.0.0.0
-sed -i 's/^\bListenIP\b.*$/ListenIP=0.0.0.0/' $ZABBIX_CONF_FILE
+sed -i  's/^.[\s \s]ListenIP=.*$/ListenIP=0.0.0.0/' $ZABBIX_CONF_FILE
 
 #StartAgents=3
-sed -i 's/^\bStartAgents\b.*$/StartAgents=3/' $ZABBIX_CONF_FILE
+sed -i  's/^.[\s \s]StartAgents=.*$/StartAgents=3/' $ZABBIX_CONF_FILE
 
 #ServerActive=admin-preproduccion-benchmark.stratio.com
-sed -i 's/^\bServerActive\b.*$/ServerActive='$ZABBIX_SERVER'/' $ZABBIX_CONF_FILE
+sed -i  's/^ServerActive=.*$/ServerActive='$ZABBIX_SERVER'/' $ZABBIX_CONF_FILE
 
 #Hostname=admin-preproduccion-benchmark.stratio.com
-sed -i 's/^\bHostname\b.*$/Hostname='$HOSTNAME'/' $ZABBIX_CONF_FILE
+sed -i  's/^Hostname.*[\s \S]*$/Hostname='$HOSTNAME'/' $ZABBIX_CONF_FILE	
 else
 	echo "Zabbix configuration file does not exists"
 fi
