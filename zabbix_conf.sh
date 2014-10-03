@@ -9,6 +9,7 @@ SOURCEIP=$(hostname --ip-address |awk {'print $1'})
 HOSTNAME=$(hostname --fqdn)
 FILESCRIPT="/home/$USER/$(basename $0)"
 
+
 if [ $# -ne 1 ]; then
 	echo $TYPE
 	echo $
@@ -20,13 +21,15 @@ if [ $# -ne 1 ]; then
 fi
 
 if  ! cat /etc/hosts | grep $ZABBIX_SERVER; then
-	echo $ZABBIX_SERVER_IP $ZABBIX_SERVER   >> /etc/hosts
+        sed -i '/'$ZABBIX_SERVER'/d' /etc/hosts
+        echo $ZABBIX_SERVER_IP $ZABBIX_SERVER   >> /etc/hosts
 fi
+
 
 if [ -s $ZABBIX_CONF_FILE ]; then
 
 #SourceIP=148.251.151.3
-sed -i  's/^.[\s \s]SourceIP=.*$/SourceIP='$SOURCEIP'/' $ZABBIX_CONF_FILE
+sed -i 's/^.*SourceIP=$/SourceIP='$SOURCEIP'/' $ZABBIX_CONF_FILE 
 
 #EnableRemoteCommands=1
 sed -i  's/^.[\s \s]EnableRemoteCommands=.*$/EnableRemoteCommands=1/' $ZABBIX_CONF_FILE
