@@ -11,7 +11,18 @@ ROOTFILE="/root/.ssh/authorized_keys"
 USERFILE="/home/stratio/.ssh/"
 USER="stratio"
 FILESCRIPT="/home/$USER/$(basename $0)"
+DOMAINNAME="stratio.com"
 DNSFILE="/etc/resolv.conf"
+IP_ADDR=$(ip addr| egrep inet" "| grep -v 127| cut -d" " -f6 | cut -d/ -f1)
+HOSTNAME=$(hostname)
+
+if dnsdomainname > /dev/null 2&>1; then
+        log_action_msg "dominio fqdn correcto"
+        else
+        sed -i '/'$HOSTNAME'/d' /etc/hosts
+        echo $IP_ADDR $HOSTNAME.$DOMAINNAME $HOSTNAME >> /etc/hosts
+fi
+
 
 log_begin_msg "Adding public keys"
 
@@ -19,7 +30,6 @@ if [ -s  $ROOTFILE ] ; then
 	log_action_begin_msg "root public key already exists. rewriting..."
 	rm -rf $ROOTFILE &&
 	echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAujkdR4yDCIpWFelWdSwx9QbuPMxKKYbNvPK1BcKq/Ic0S8hvD7Ryk9bILMMcFxFXNMVURgQZ5DFLJouq8klOENUf4j3davsLc6FZ8oIeGdD5sxSR8UouuE7x4QNbbOV5sym1xlL8ZtdmZK5JPnmfv+QWkvn06gm2G2Q6l47PT/am9wQdoqG68j9gqT4JXbxnWBfmCaDbbz2CwUPD9vyUToQfi4ar5tCZIenX5hUAd/dEYO7RMMUrocL8LvXY7lIYF/GG0YzNZ4edqF6CXy7DjFH70BOFwLqEUuvfLyaUzDlXQAOZMY6Su7El1FORLkjHZL9zre6i98Y7H8wB09dD2w==" >> $ROOTFILE &&
-	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCwkOKcjhvvufzPBDwJnw/CNhw2xR0JDwJUpBK9z4DyrhmA2Mf5jnr11jPco4Obhs6BvuzUVSbVvniQ8kZM/c6PEctXft4kT83f07Id0SbUHkxJfMS9b4xvqqSr3pYOd4BxlFbPFIlcH5YqSDDSE3CSPQZycQV1iodJjIpX2TpDKCeju5GbEwcy+3UaZ7RoNtbBbcJVryrbDM8zyXzqTXrROtF3GQ4hmA1zHO+jycXMu8yEy7WV2CORJs6zD75RwEtWgIolEKR0GOzRuNWlDc0KyJdmhu5uxhdEGnGJH2bpu6W1vVOOT7rDMHsWBLzdTkWRMaROh9m/nmsaXWOKi9dN francisco@paco" >> $ROOTFILE &&
 
 	if [ ! -d /root/.ssh/ ]; then
 		mkdir -p /root/.ssh/
@@ -31,18 +41,16 @@ if [ -s  $ROOTFILE ] ; then
 
 else
 	echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAujkdR4yDCIpWFelWdSwx9QbuPMxKKYbNvPK1BcKq/Ic0S8hvD7Ryk9bILMMcFxFXNMVURgQZ5DFLJouq8klOENUf4j3davsLc6FZ8oIeGdD5sxSR8UouuE7x4QNbbOV5sym1xlL8ZtdmZK5JPnmfv+QWkvn06gm2G2Q6l47PT/am9wQdoqG68j9gqT4JXbxnWBfmCaDbbz2CwUPD9vyUToQfi4ar5tCZIenX5hUAd/dEYO7RMMUrocL8LvXY7lIYF/GG0YzNZ4edqF6CXy7DjFH70BOFwLqEUuvfLyaUzDlXQAOZMY6Su7El1FORLkjHZL9zre6i98Y7H8wB09dD2w==" >> $ROOTFILE
-	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCwkOKcjhvvufzPBDwJnw/CNhw2xR0JDwJUpBK9z4DyrhmA2Mf5jnr11jPco4Obhs6BvuzUVSbVvniQ8kZM/c6PEctXft4kT83f07Id0SbUHkxJfMS9b4xvqqSr3pYOd4BxlFbPFIlcH5YqSDDSE3CSPQZycQV1iodJjIpX2TpDKCeju5GbEwcy+3UaZ7RoNtbBbcJVryrbDM8zyXzqTXrROtF3GQ4hmA1zHO+jycXMu8yEy7WV2CORJs6zD75RwEtWgIolEKR0GOzRuNWlDc0KyJdmhu5uxhdEGnGJH2bpu6W1vVOOT7rDMHsWBLzdTkWRMaROh9m/nmsaXWOKi9dN francisco@paco" >> $ROOTFILE
 
 	chmod -R 400 /root/.ssh/authorized_keys
 fi
 	log_action_msg "Done"
-	log_action_end_msg $?
+#	log_action_end_msg $?
 
 if  cat $DNSFILE | grep nameserver >/dev/null 2>&1; then
 	echo "dns configurados"
 else
 	echo "nameserver 8.8.8.8" >> $DNSFILE
-	echo "nameserver 8.8.4.4" >> $DNSFILE
 fi
 
 	log_action_begin_msg "Installing basic packages"
@@ -57,19 +65,19 @@ fi
 
 if id -u $USER >/dev/null 2>&1; then
 	
-#		if [ -s /etc/sudoers ]; then
-#			
-#			if cat /etc/sudoers | grep NOPASSWD 2>&1; then
-#				echo "usuario stratio en fichero sudoers"
-#			else
-#				echo "stratio ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-#			fi
-#
-#		else
-#			apt-get update && apt-get install -y sudo
-#			echo "stratio ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-#			visudo -c > /dev/null 2>&1
-#		fi
+		if [ -s /etc/sudoers ]; then
+			
+			if cat /etc/sudoers | grep NOPASSWD 2>&1; then
+				echo "usuario stratio en fichero sudoers"
+			else
+				echo "stratio ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+			fi
+
+		else
+			apt-get update && apt-get install -y sudo
+			echo "stratio ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+			visudo -c > /dev/null 2>&1
+		fi
 
 	if [ ! -d /home/$USER/.ssh ]; then
 		mkdir -p /home/$USER/.ssh
@@ -122,7 +130,7 @@ if cat /etc/ssh/sshd_config| grep "AllowUsers stratio" >/dev/null 2>&1; then
 
 else
 
-	echo "AllowUsers stratio" >> /etc/ssh/sshd_config
+	echo "AllowUsers root" >> /etc/ssh/sshd_config
 
 fi
 
